@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RTFT Team Rewards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one column. Goal meter on top, 3 reward tiers, team ideas board. Single dark look by design. */
+:root{
+  color-scheme:dark;
+  --bg:#0e1215; --panel:#151a1f; --panel2:#1b2228; --line:#28313a; --line2:#34404b;
+  --fg:#e6e9eb; --muted:#8a96a2; --dim:#5f6b76;
+  --accent:#f0b232; --accent-ink:#1a1405; --good:#4cc38a;
+  --bronze:#c58a5c; --silver:#b9c3cc; --gold:#e8c35f;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font:15px/1.5 var(--body);margin:0}
+.wrap{max-width:860px;margin:0 auto;padding-inline:18px;padding-block:24px 64px}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h2{font:700 22px/1.1 var(--display);letter-spacing:.04em;text-transform:uppercase;margin:0}
+.sub{color:var(--muted);font-size:13.5px;margin:4px 0 0}
+
+header{display:flex;flex-wrap:wrap;gap:12px 20px;justify-content:space-between;align-items:flex-end}
+header h1{font:700 40px/.95 var(--display);letter-spacing:.02em;text-transform:uppercase;margin:0}
+header h1 span{color:var(--accent)}
+.when{font:600 15px var(--body);color:var(--muted)}
+.when b{color:var(--fg)}
+.hazard{height:6px;margin:16px 0 22px;border-radius:2px;background:repeating-linear-gradient(-45deg,var(--accent) 0 10px,#15120a 10px 20px);opacity:.85}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.meter-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:baseline}
+.big{font:700 54px/1 var(--display);letter-spacing:.01em}
+.big small{font:600 22px var(--display);color:var(--muted)}
+.streak{text-align:right}
+.streak .n{font:700 34px/1 var(--display);color:var(--accent)}
+.streak .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.bar{height:16px;background:var(--panel2);border-radius:8px;margin-top:14px;overflow:hidden;position:relative}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#b98419,var(--accent));border-radius:8px;transition:width .4s}
+.bar.hit i{background:var(--good)}
+.meter-foot{display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+
+.months{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+.mo{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.mo.now{border-color:var(--accent)}
+.mo label{display:block;font-size:12px;color:var(--muted)}
+.mo label b{color:var(--fg);font-weight:600}
+.mo input{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line2);padding:6px 0 3px;font:500 18px var(--mono)}
+.mo input::placeholder{color:var(--dim)}
+.mo .st{font-size:12px;margin-top:4px;color:var(--muted)}
+.mo .st.hit{color:var(--good);font-weight:600}
+
+.sec{margin-top:30px}
+.tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.tier{--c:var(--accent);background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.tier .nm{font:700 24px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;color:var(--c)}
+.tier .goal{font-weight:600;font-size:14px}
+.tier .by{font-size:12.5px;color:var(--muted)}
+.tier .rlbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.tier textarea{width:100%;background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:8px 10px;resize:vertical;min-height:62px;font-size:14px;line-height:1.4}
+.tier .state{margin-top:auto;padding-top:8px;font-size:13px;font-weight:600;color:var(--muted)}
+.tier.on{background:color-mix(in srgb,var(--c) 9%,var(--panel))}
+.tier.on .state{color:var(--good)}
+
+.ideas{margin-top:14px;display:grid;gap:8px}
+.idea{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.vote{display:flex;flex-direction:column;align-items:center;min-width:46px;background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:4px 6px;line-height:1.1}
+.vote .a{font-size:11px;color:var(--muted)}
+.vote .c{font:600 17px var(--mono)}
+.vote[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,var(--panel2))}
+.vote[aria-pressed="true"] .a{color:var(--accent)}
+.idea .t{min-width:0;overflow-wrap:anywhere}
+.idea .w{font-size:12px;color:var(--dim)}
+.x{background:none;border:0;color:var(--dim);font-size:16px;padding:4px 6px;border-radius:4px}
+.x:hover{color:#e5534b}
+.x.arm{color:#e5534b;font-size:12px;font-weight:600;border:1px solid #e5534b}
+.addidea{display:flex;gap:8px;margin-top:10px}
+.addidea input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:10px 12px}
+.addidea input::placeholder{color:var(--dim)}
+.btn{border:1px solid var(--line2);background:var(--panel2);border-radius:6px;padding:9px 14px;font-weight:500;font-size:14px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.empty{color:var(--dim);font-size:14px;padding:12px;border:1px dashed var(--line2);border-radius:8px}
+.foot{margin-top:28px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:13px}
+.banner{margin-bottom:16px;border:1px solid var(--line2);background:var(--panel);border-radius:8px;padding:12px 14px;color:var(--muted);font-size:13px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:6px;font-size:13px;font-weight:500;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+
+@media (max-width:680px){
+  .tiers,.months{grid-template-columns:1fr}
+  header h1{font-size:32px}
+  .big{font-size:44px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.addidea .name{flex:0 0 140px}
+@media (max-width:680px){.addidea{flex-wrap:wrap}.addidea .name{flex:1 1 100%}}
+code{font-family:var(--mono);color:var(--accent)}
+.banner b{color:var(--fg)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div id="banner" class="banner" hidden></div>
+  <header>
+    <h1>RTFT <span>Team Rewards</span></h1>
+    <div class="when" id="when">Starts Monday, Oct 12</div>
+  </header>
+  <div class="hazard" aria-hidden="true"></div>
+
+  <section class="card" aria-label="This month">
+    <div class="meter-top">
+      <div>
+        <div class="sub" id="moLbl" style="margin:0 0 4px">Month 1 revenue</div>
+        <div class="big num" id="moRev">$0 <small>/ $20K</small></div>
+      </div>
+      <div class="streak"><div class="n num" id="streakN">0</div><div class="l">Months in a row at $20K</div></div>
+    </div>
+    <div class="bar" id="bar"><i style="width:0"></i></div>
+    <div class="meter-foot"><span id="moLeft">$20,000 to go</span><span id="moDays"></span></div>
+    <div class="months" id="months"></div>
+  </section>
+
+  <section class="sec">
+    <h2>The Tiers</h2>
+    <p class="sub">Hit $20K in a 30-day stretch, unlock the reward. Click a reward to change it.</p>
+    <div class="tiers" id="tiers"></div>
+  </section>
+
+  <section class="sec">
+    <h2>Reward Ideas</h2>
+    <p class="sub">Keith wants everyone's input. Add an idea and vote for your favorites. Top picks become the tier rewards.</p>
+    <div class="ideas" id="ideas"></div>
+    <form class="addidea" id="addIdea"><input id="nameIn" class="name" placeholder="Your name" aria-label="Your name" maxlength="40"><input id="ideaIn" placeholder="e.g. Friday team breakfast" aria-label="New reward idea" maxlength="140"><button class="btn primary" type="submit">Add idea</button></form>
+  </section>
+
+  <div class="foot">
+    <span>Right the First Time · Build it right. Fix it right. Clean it right.</span>
+    <button class="btn" id="copyBtn" type="button">Copy update for team chat</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+/* ====== PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE ====== */
+const API_URL = "https://script.google.com/macros/s/AKfycbySAPPtBHeoxsZAL-kuCJi1OJe_-dugj_stXJ1lDq3LgrRlUjrGmxz-7KLrs4ZCozo4/exec";
+/* ============================================================ */
+const LIVE = /^https:\/\/script\.google\.com\//.test(API_URL);
+const DEF={startDate:"2026-10-12",goal:20000,revenue:[null,null,null],tiers:[
+ {name:"Bronze",goal:"30-Day Goal: $20K in Month 1",reward:"Team lunch on Keith + come in 2 hours late the next Monday"},
+ {name:"Silver",goal:"$20K again in Month 2",reward:"Half-day Friday OR $100-250 cash bonus each (team picks)"},
+ {name:"Gold",goal:"90-Day Goal: $20K all 3 months back to back",reward:"Full paid day off + team bonus"}],
+ ideas:[{id:"k1",text:"Come in a couple hours later that day",from:"Keith",voters:[]},{id:"k2",text:"Free day off",from:"Keith",voters:[]},{id:"k3",text:"Little cash bonus",from:"Keith",voters:[]}]};
+const COLORS=["var(--bronze)","var(--silver)","var(--gold)"];
+let S=JSON.parse(JSON.stringify(DEF)),loaded=!LIVE,armed=null,busy=0;
+const ls={get(k,d){try{const v=localStorage.getItem("rtft."+k);return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem("rtft."+k,v)}catch(e){}}};
+let myId=ls.get("voter",null);if(!myId){myId="v"+Math.random().toString(36).slice(2,10);ls.set("voter",myId)}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>"$"+Math.round(n||0).toLocaleString("en-US");
+const kfmt=n=>"$"+(n/1000).toFixed(n%1000?1:0)+"K";
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2400)}
+
+function start(){const p=String(S.startDate||DEF.startDate).split("-").map(Number);return new Date(p[0],p[1]-1,p[2])}
+function today(){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+function dayN(){return Math.floor((today()-start())/864e5)+1}
+function dOf(n){const d=start();d.setDate(d.getDate()+n-1);return d}
+const fmt=d=>d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+function curMonth(){const d=dayN();return d<1?0:Math.min(2,Math.floor((d-1)/30))}
+const goal=()=>Number(S.goal)||20000;
+const rev=i=>{const v=(S.revenue||[])[i];return v==null||v===""||isNaN(v)?null:Number(v)};
+const hit=i=>rev(i)!=null&&rev(i)>=goal();
+function streak(){let r=0;for(let i=0;i<3;i++){if(hit(i))r++;else if(rev(i)!=null||i<curMonth())r=0}return r}
+function tierOn(i){return i===2?(hit(0)&&hit(1)&&hit(2)):hit(i)}
+
+/* ---------- API ---------- */
+async function pull(){
+  if(!LIVE||busy)return;
+  try{const r=await fetch(API_URL+"?t="+Date.now());const j=await r.json();if(j.ok&&!busy){S=j.state;loaded=true;render()}}
+  catch(e){if(!loaded){loaded=true;render()}console.warn(e)}
+}
+async function push(body){
+  if(!LIVE){render();toast("Demo mode: connect the Google Sheet to save");return}
+  busy++;
+  try{const r=await fetch(API_URL,{method:"POST",body:JSON.stringify(body)});const j=await r.json();
+    if(j.ok){S=j.state}else toast("Could not save: "+j.error)}
+  catch(e){toast("Could not save. Check your connection.")}
+  finally{busy--;render()}
+}
+
+function render(){
+  const f=document.activeElement&&document.activeElement.id;
+  const d=dayN(),m=curMonth(),g=goal();
+  $("#when").innerHTML=d<1?"Starts <b>Monday, "+fmt(start())+"</b> · "+(1-d)+" day"+(1-d>1?"s":"")+" away":d>90?"<b>90 days complete</b>":"<b>Day "+d+" of 90</b> · "+fmt(dOf(1))+" to "+fmt(dOf(90));
+  const r=rev(m)||0;
+  $("#moLbl").textContent="Month "+(m+1)+" revenue · "+fmt(dOf(m*30+1))+" to "+fmt(dOf(m*30+30));
+  $("#moRev").innerHTML=money(r)+" <small>/ "+kfmt(g)+"</small>";
+  const p=Math.min(100,Math.round(r/g*100));
+  $("#bar").classList.toggle("hit",r>=g);$("#bar i").style.width=p+"%";
+  $("#moLeft").textContent=r>=g?"Goal hit. Nice work, team.":money(g-r)+" to go ("+p+"%)";
+  const left=d<1?null:Math.max(0,(m+1)*30-d+1);
+  $("#moDays").textContent=left==null?"Clock starts "+fmt(start()):left+" day"+(left===1?"":"s")+" left this month";
+  $("#streakN").textContent=streak();
+  let mh="";for(let i=0;i<3;i++){const v=rev(i);
+    mh+='<div class="mo'+(i===m&&d>=1?" now":"")+'"><label for="rev'+i+'"><b>Month '+(i+1)+'</b> · '+fmt(dOf(i*30+1))+'-'+fmt(dOf(i*30+30))+'</label><input id="rev'+i+'" data-i="'+i+'" inputmode="decimal" placeholder="$0" value="'+(v==null?"":v)+'"><div class="st'+(hit(i)?" hit":"")+'">'+(v==null?(i<m?"Not entered":i===m&&d>=1?"In progress":"Upcoming"):hit(i)?"Hit $20K":Math.round(v/g*100)+"% of goal")+'</div></div>'}
+  $("#months").innerHTML=mh;
+  $("#tiers").innerHTML=(S.tiers||DEF.tiers).map((t,i)=>{const on=tierOn(i);
+    return '<div class="tier'+(on?" on":"")+'" style="--c:'+COLORS[i]+'"><div class="nm">'+esc(t.name)+'</div><div class="goal">'+esc(t.goal||DEF.tiers[i].goal)+'</div><div class="by">By '+fmt(dOf((i+1)*30))+'</div><div class="rlbl">Reward</div><textarea id="tier'+i+'" data-t="'+i+'" rows="2" aria-label="'+esc(t.name)+' reward">'+esc(t.reward)+'</textarea><div class="state">'+(on?"Unlocked!":"Locked")+'</div></div>'}).join("");
+  const ideas=(S.ideas||[]).map(x=>({...x,n:(x.voters||[]).length})).sort((a,b)=>b.n-a.n||String(a.added||a.id).localeCompare(String(b.added||b.id)));
+  $("#ideas").innerHTML=ideas.length?ideas.map(x=>{const mine=(x.voters||[]).includes(myId);
+    return '<div class="idea"><button class="vote" type="button" data-vote="'+esc(x.id)+'" aria-pressed="'+mine+'" aria-label="Vote"><span class="a">▲</span><span class="c">'+x.n+'</span></button><div class="t">'+esc(x.text)+(x.from?'<div class="w">from '+esc(x.from)+'</div>':"")+'</div><button class="x'+(armed===x.id?" arm":"")+'" type="button" data-del="'+esc(x.id)+'" aria-label="Remove idea">'+(armed===x.id?"Remove?":"×")+'</button></div>'}).join(""):'<div class="empty">'+(loaded?"No ideas yet. Add the first one below.":"Loading…")+'</div>';
+  if(f){const el=document.getElementById(f);if(el&&el!==document.activeElement)el.focus()}
+}
+
+document.addEventListener("change",e=>{const t=e.target;
+  if(t.dataset.i!=null){const raw=t.value.replace(/[$,\s]/g,"");if(raw!==""&&isNaN(+raw)){toast("Enter a number, like 18500");return}
+    const i=+t.dataset.i;S.revenue=[...(S.revenue||[null,null,null])];S.revenue[i]=raw===""?null:+raw;push({action:"revenue",month:i,value:raw===""?null:+raw})}
+  if(t.dataset.t!=null){const i=+t.dataset.t;S.tiers[i].reward=t.value.trim();push({action:"tier",tier:i,reward:t.value.trim()})}
+  if(t.id==="nameIn")ls.set("name",t.value.trim());
+});
+document.addEventListener("click",e=>{
+  const v=e.target.closest("[data-vote]"),dl=e.target.closest("[data-del]");
+  if(v){const x=S.ideas.find(i=>i.id===v.dataset.vote);if(!x)return;const on=!(x.voters||[]).includes(myId);
+    x.voters=(x.voters||[]).filter(id=>id!==myId);if(on)x.voters.push(myId);render();push({action:"vote",id:x.id,voter:myId,on})}
+  if(dl){const id=dl.dataset.del;if(armed!==id){armed=id;render();setTimeout(()=>{if(armed===id){armed=null;render()}},3000);return}
+    armed=null;S.ideas=S.ideas.filter(i=>i.id!==id);push({action:"delete",id})}
+});
+$("#addIdea").addEventListener("submit",e=>{e.preventDefault();const t=$("#ideaIn").value.trim();if(!t)return;
+  const from=$("#nameIn").value.trim();ls.set("name",from);$("#ideaIn").value="";
+  S.ideas=[...(S.ideas||[]),{id:"tmp"+Date.now(),text:t,from:from||"Teammate",voters:[myId]}];
+  push({action:"addIdea",text:t,from,voter:myId})});
+$("#copyBtn").addEventListener("click",async()=>{
+  const m=curMonth(),r=rev(m)||0,g=goal(),d=dayN(),tiers=S.tiers||DEF.tiers;
+  const top=(S.ideas||[]).map(x=>({t:x.text,n:(x.voters||[]).length})).sort((a,b)=>b.n-a.n).slice(0,3);
+  const L=["RTFT Team Rewards update"+(d>=1&&d<=90?" (Day "+d+" of 90)":""),"",
+    "Month "+(m+1)+": "+money(r)+" of "+money(g)+" ("+Math.round(r/g*100)+"%)"+(r<g?" - "+money(g-r)+" to go":" - GOAL HIT"),
+    "Streak: "+streak()+" month(s) in a row at $20K","",
+    "Bronze (30-day goal): "+tiers[0].reward+(tierOn(0)?" - UNLOCKED":""),
+    "Silver (month 2): "+tiers[1].reward+(tierOn(1)?" - UNLOCKED":""),
+    "Gold (90-day goal): "+tiers[2].reward+(tierOn(2)?" - UNLOCKED":"")];
+  if(top.length)L.push("","Top reward ideas so far:",...top.map((x,i)=>(i+1)+". "+x.t+" ("+x.n+" vote"+(x.n===1?"":"s")+")"));
+  L.push("","Vote and add ideas here: "+location.href);
+  const txt=L.join("\n");
+  try{await navigator.clipboard.writeText(txt);toast("Copied")}catch(err){const a=document.createElement("textarea");a.value=txt;document.body.appendChild(a);a.select();try{document.execCommand("copy");toast("Copied")}catch(_){toast("Copy blocked")}a.remove()}
+});
+
+$("#nameIn").value=ls.get("name","");
+if(!LIVE){const b=$("#banner");b.hidden=false;b.innerHTML="<b>Demo mode.</b> Paste your Google Apps Script URL into <code>API_URL</code> in index.html so changes save for everyone.";}
+render();pull();
+setInterval(()=>{if(!document.hidden)pull()},20000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull()});
+})();
+</script>
+</body>
+</html>
